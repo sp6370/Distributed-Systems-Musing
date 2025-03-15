@@ -21,12 +21,14 @@ int main() {
     int fd = open(file_path, O_RDONLY);
     if (fd == -1){
         perror("ERROR: opening the file");
+        close(fd);
         return 1;
     }
 
     int op_result = lseek(fd, 100, SEEK_END); // from the file end move 100 postion to the right
     if (op_result == -1){
         perror("ERROR: on performing lseek");
+        close(fd);
         return 1;
     }
     
@@ -37,10 +39,13 @@ int main() {
     int read_op_result = read(fd, read_buffer, 100);
     if (read_op_result == -1){
         perror("ERROR: can't read after lseek beyond end in file");
+        close(fd);
+        return 1;
     }
 
     if (read_op_result == 0){
         printf("WARN: read says end of file reached\n");
+        close(fd);
         return 0;
     }
 
@@ -50,5 +55,6 @@ int main() {
         printf("%c", read_buffer[i]);
     }
     
+    close(fd); // go defer would have been really helpful here
     return 0;
 }
